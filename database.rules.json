@@ -1,0 +1,71 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+
+    "bins": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "$binId": {
+        "compartments": {
+          "$wasteType": {
+            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (root.child('users').child(auth.uid).child('role').val() === 'collector' && root.child('collectors').child(auth.uid).child('wasteClass').val() === $wasteType))"
+          }
+        }
+      }
+    },
+
+    "collectors": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "vehicles": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('collectors').child(auth.uid).exists())"
+    },
+
+    "vendors": {
+      ".read": "auth != null",
+      "$vendorId": {
+        ".write": "auth != null && (auth.uid === $vendorId || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+
+    "collections": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() !== 'vendor'"
+    },
+
+    "wasteInventory": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+
+    "dispatches": {
+      ".read": "auth != null",
+      "$dispatchId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || (root.child('users').child(auth.uid).child('role').val() === 'vendor' && root.child('vendors').child(auth.uid).child('licenseStatus').val() === 'VERIFIED'))"
+      }
+    },
+
+    "disposals": {
+      ".read": "auth != null",
+      "$disposalId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'collector')"
+      }
+    },
+
+    "simulation": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    }
+  }
+}
